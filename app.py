@@ -89,7 +89,7 @@ def review_code():
     ai_feedback = "AI Review unavailable."
     try:
         completion = client.chat.completions.create(
-      model="llama-3.1-70b-versatile",
+      model="llama3-8b-8192",
             messages=[
                 {
                     "role": "system",
