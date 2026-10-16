@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Audit History | Code-Clerk PoC</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0d1117; color: #c9d1d9; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; background: #161b22; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        h1 { color: #58a6ff; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #0d1117; }
+        th, td { border: 1px solid #30363d; padding: 12px; text-align: left; font-size: 14px; }
+        th { background: #21262d; color: #58a6ff; }
+        a { color: #58a6ff; text-decoration: none; display: inline-block; margin-bottom: 20px; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Security Audit History Log</h1>
+        <a href="/">&larr; Back to Dashboard</a>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Language</th>
+                    <th>Code Snippet</th>
+                    <th>Score</th>
+                    <th>Issues Found</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in history %}
+                <tr>
+                    <td>{{ row[0] }}</td>
+                    <td><span style="background: #238636; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px;">{{ row[4] | upper }}</span></td>
+                    <td><pre style="margin:0; font-family:monospace; max-width: 250px; overflow: hidden; text-overflow: ellipsis;">{{ row[1] }}</pre></td>
+                    <td><strong>{{ row[2] }} / 100</strong></td>
+                    <td>{{ row[3] }}</td>
+                    <td><a href="/download/{{ row[0] }}" style="font-size: 12px;">Download .TXT</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

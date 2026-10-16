@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Code-Clerk | DevSecOps PoC</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0d1117; color: #c9d1d9; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #161b22; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        h1 { color: #58a6ff; text-align: center; }
+        select, textarea { width: 100%; background: #0d1117; color: #58a6ff; border: 1px solid #30363d; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 14px; margin-bottom: 15px; }
+        textarea { height: 180px; }
+        button { background: #238636; color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 6px; cursor: pointer; width: 100%; }
+        button:hover { background: #2ea043; }
+        .result { margin-top: 20px; background: #0d1117; padding: 20px; border-radius: 6px; border: 1px solid #30363d; }
+        .score { font-size: 22px; font-weight: bold; color: #3fb950; }
+        ul { color: #f85149; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Code-Clerk (DevSecOps PoC)</h1>
+        <div style="text-align: right; margin-bottom: 10px;">
+            <a href="/history" style="color: #58a6ff; text-decoration: none;">View Audit History &rarr;</a>
+        </div>
+        
+        <form action="/review" method="POST">
+            <label style="font-weight: bold; color: #8b949e;">Select Action:</label>
+            <select name="action_type">
+                <option value="audit">Security Audit (Check existing code)</option>
+                <option value="generate">Secure Code Generation (Write new code)</option>
+            </select>
+
+            <label style="font-weight: bold; color: #8b949e;">Select Programming Language:</label>
+            <select name="language">
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript / Node.js</option>
+                <option value="cpp">C++</option>
+            </select>
+
+            <label style="font-weight: bold; color: #8b949e;">Paste Code (for Audit) OR Describe Requirement (for Generation):</label>
+            <textarea name="code_text" placeholder="Example for Audit: def insecure_login(): ...&#10;Example for Generation: Write a secure user login function connecting to MySQL..."></textarea>
+            
+            <button type="submit">Run Hybrid Security Scan</button>
+        </form>
+
+        {% if result %}
+        <div class="result">
+            <h3>Result (Language: {{ result.language | upper }} | Mode: {{ result.mode | upper }})</h3>
+            
+            {% if result.mode == 'audit' %}
+                <p class="score">Security Score: {{ result.security_score }} / 100</p>
+                <h4>Detected Vulnerabilities & Warnings (AST Scanner):</h4>
+                {% if result.issues_found %}
+                    <ul>
+                    {% for issue in result.issues_found %}
+                        <li>{{ issue }}</li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p style="color: #3fb950;">No baseline vulnerabilities detected by local AST Scanner. Code syntax is safe.</p>
+                {% endif %}
+            {% endif %}
+
+            <h4>🤖 Intelligent AI Security Review:</h4>
+            <div style="background: #010409; padding: 15px; border-radius: 6px; white-space: pre-wrap; font-family: monospace; font-size: 13px; color: #7ee787;">
+                {{ result.ai_feedback }}
+            </div>
+
+            <div style="margin-top: 20px;">
+                <a href="/download/{{ result.review_id }}" style="background: #1f6feb; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-size: 14px; display: inline-block;">📥 Download Audit Report (.TXT)</a>
+            </div>
+            <div style="margin-top: 15px;">
+                <a href="/" style="background: #21262d; color: #58a6ff; padding: 10px 15px; border-radius: 6px; text-decoration: none; border: 1px solid #30363d; display: inline-block;">🔄 Start New Task (Clear)</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
