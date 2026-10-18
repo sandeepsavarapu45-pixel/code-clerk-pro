@@ -7,10 +7,8 @@ from groq import Groq
 
 app = Flask(__name__)
 
-# CRITICAL SECURITY FIX: Never hardcode API keys. 
-# We fetch it from the environment variable now.
-api_key = os.environ.get("GROQ_API_KEY")
-client = Groq(api_key=api_key)
+# Fetching API key securely from Environment Variables
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 def init_db():
     conn = sqlite3.connect('code_clerk.db')
@@ -75,21 +73,21 @@ def review_code():
         if score < 30:
             score = 30
             
-        system_prompt = "You are an intelligent DevSecOps AI Assistant. Perform a vulnerability and performance audit of the provided code, explaining the risks and providing a secure, refactored version."
+        system_prompt = "You are an elite Principal Cloud Security Architect. Perform a rigorous vulnerability and performance audit of the provided code, explaining the risks and providing a secure, production-ready refactored version."
         user_prompt = f"Language: {language}\n\nCode snippet to audit:\n\n{code_text}"
-        message_text = "Hybrid AST + AI Audit completed successfully."
+        message_text = "Enterprise 10x Hybrid AST + AI Audit completed successfully!"
         
     else:
         # 2. Logic for Secure Code Generation
         issues.append("N/A - Secure Code Generation Mode")
-        system_prompt = "You are an intelligent DevSecOps AI Assistant. The user will give you a requirement. You must generate secure, vulnerability-free code to fulfill this requirement. Include comments explaining the security best practices applied."
+        system_prompt = "You are an elite Principal Cloud Security Architect and Lead Developer. The user will give you a requirement. You must generate highly secure, production-ready, vulnerability-free code to fulfill this requirement. Do not just write code; include comments explaining the security best practices you applied."
         user_prompt = f"Language: {language}\n\nRequirement for Secure Code Generation:\n\n{code_text}"
-        message_text = "Secure Code Generated Successfully."
+        message_text = "Highly Secure Code Generated Successfully!"
 
     ai_feedback = "AI Review unavailable."
     try:
         completion = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
+            model="llama3-70b-8192",
             messages=[
                 {
                     "role": "system",
@@ -152,13 +150,13 @@ def download_report(review_id):
         return "Report not found", 404
         
     report_content = f"""==================================================
-        CODE-CLERK: DEVSECOPS SECURITY AUDIT REPORT
+        CODE-CLERK PRO: ENTERPRISE AUDIT REPORT
 ==================================================
 Review ID:     {review_id}
 Language:      {row[3].upper()}
 Security Score: {row[1]} / 100
 --------------------------------------------------
-DETECTED VULNERABILITIES & WARNINGS (LOCAL AST):
+DETECTED VULNERABILITIES & WARNINGS:
 {row[2]}
 --------------------------------------------------
 SOURCE TEXT/CODE SUBMITTED:
@@ -168,7 +166,7 @@ SOURCE TEXT/CODE SUBMITTED:
     return Response(
         report_content,
         mimetype="text/plain",
-        headers={"Content-disposition": f"attachment; filename=security_audit_report_{review_id}.txt"}
+        headers={"Content-disposition": f"attachment; filename=enterprise_audit_report_{review_id}.txt"}
     )
 
 if __name__ == '__main__':
