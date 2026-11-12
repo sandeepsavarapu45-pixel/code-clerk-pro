@@ -1,3 +1,7 @@
 __pycache__/
 *.db
 .env
+code_clerk.db
+security_audit.log
+__pycache__/
+.vscode/

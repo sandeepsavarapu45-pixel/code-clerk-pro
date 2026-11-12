@@ -2,78 +2,171 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Code-Clerk | DevSecOps PoC</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code-Clerk Pro | Cloud & DevSecOps Auditor</title>
     <style>
         body { font-family: Arial, sans-serif; background: #0d1117; color: #c9d1d9; margin: 0; padding: 20px; }
         .container { max-width: 900px; margin: auto; background: #161b22; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
-        h1 { color: #58a6ff; text-align: center; }
-        select, textarea { width: 100%; background: #0d1117; color: #58a6ff; border: 1px solid #30363d; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 14px; margin-bottom: 15px; }
-        textarea { height: 180px; }
-        button { background: #238636; color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 6px; cursor: pointer; width: 100%; }
+        h1 { color: #58a6ff; text-align: center; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #8b949e; font-size: 13px; margin-bottom: 20px; }
+        select, textarea { width: 100%; box-sizing: border-box; background: #0d1117; color: #58a6ff; border: 1px solid #30363d; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 14px; margin-bottom: 15px; }
+        textarea { height: 180px; resize: vertical; }
+        button { background: #238636; color: white; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; transition: 0.2s; }
         button:hover { background: #2ea043; }
+        button:disabled { background: #30363d; color: #8b949e; cursor: not-allowed; }
         .result { margin-top: 20px; background: #0d1117; padding: 20px; border-radius: 6px; border: 1px solid #30363d; }
         .score { font-size: 22px; font-weight: bold; color: #3fb950; }
-        ul { color: #f85149; }
+        ul { color: #f85149; line-height: 1.6; }
+        .char-counter { text-align: right; font-size: 12px; color: #8b949e; margin-top: -10px; margin-bottom: 10px; }
+
+        /* Cyber Alert Cartoon & GIF Styles */
+        @keyframes shakeAlert {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px) rotate(-2deg); }
+            75% { transform: translateX(8px) rotate(2deg); }
+        }
+        @keyframes wagFinger {
+            0%, 100% { transform: rotate(-15deg); }
+            50% { transform: rotate(20deg); }
+        }
+        .cyber-cartoon-box {
+            background: linear-gradient(135deg, #2a0808, #4a0e0e);
+            border: 2px solid #ff3333;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 0 20px rgba(255, 51, 51, 0.4);
+            animation: shakeAlert 0.5s ease-in-out 2;
+        }
+        .cartoon-avatar {
+            font-size: 50px;
+            position: relative;
+            line-height: 1;
+            display: none;
+            flex-shrink: 0;
+        }
+        .wagging-finger {
+            display: inline-block;
+            font-size: 32px;
+            animation: wagFinger 0.4s infinite ease-in-out;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Code-Clerk (DevSecOps PoC)</h1>
+        <h1>🛡️ Code-Clerk Pro</h1>
+        <p class="subtitle">Zero-Trust SAST, Cloud IAM Governance & AI Remediation Engine</p>
+
         <div style="text-align: right; margin-bottom: 10px;">
-            <a href="/history" style="color: #58a6ff; text-decoration: none;">View Audit History &rarr;</a>
+            <a href="/history" style="color: #58a6ff; text-decoration: none; font-size: 14px;">View Audit History &rarr;</a>
         </div>
         
-        <form action="/review" method="POST">
+        <form id="auditForm" action="/review" method="POST">
             <label style="font-weight: bold; color: #8b949e;">Select Action:</label>
             <select name="action_type">
-                <option value="audit">Security Audit (Check existing code)</option>
-                <option value="generate">Secure Code Generation (Write new code)</option>
+                <option value="audit">Security Audit (SAST + Cloud DevSecOps Check)</option>
+                <option value="generate">Secure Code Generation (Least-Privilege Design)</option>
             </select>
 
-            <label style="font-weight: bold; color: #8b949e;">Select Programming Language:</label>
+            <label style="font-weight: bold; color: #8b949e;">Select Target Language / Cloud Config:</label>
             <select name="language">
-                <option value="python">Python</option>
+                <option value="python">Python (AST + Regex + DevSecOps)</option>
+                <option value="aws_iam">AWS IAM Policy / Cloud Config (JSON/YAML)</option>
+                <option value="dockerfile">Dockerfile / Container Config</option>
+                <option value="sql">SQL Queries</option>
                 <option value="javascript">JavaScript / Node.js</option>
                 <option value="cpp">C++</option>
             </select>
 
-            <label style="font-weight: bold; color: #8b949e;">Paste Code (for Audit) OR Describe Requirement (for Generation):</label>
-            <textarea name="code_text" placeholder="Example for Audit: def insecure_login(): ...&#10;Example for Generation: Write a secure user login function connecting to MySQL..."></textarea>
+            <label style="font-weight: bold; color: #8b949e;">Paste Code/Config (Max 20,000 chars):</label>
+            <textarea id="codeInput" name="code_text" required maxlength="20000" placeholder="Example for Audit: def insecure_login(): ...&#10;Example for Generation: Write a least-privilege AWS IAM policy for S3 bucket access..."></textarea>
+            <div id="charCount" class="char-counter">0 / 20000 characters</div>
             
-            <button type="submit">Run Hybrid Security Scan</button>
+            <button id="submitBtn" type="submit">Run Zero-Trust Security Scan</button>
         </form>
 
         {% if result %}
-        <div class="result">
-            <h3>Result (Language: {{ result.language | upper }} | Mode: {{ result.mode | upper }})</h3>
-            
-            {% if result.mode == 'audit' %}
-                <p class="score">Security Score: {{ result.security_score }} / 100</p>
-                <h4>Detected Vulnerabilities & Warnings (AST Scanner):</h4>
-                {% if result.issues_found %}
-                    <ul>
-                    {% for issue in result.issues_found %}
-                        <li>{{ issue }}</li>
-                    {% endfor %}
-                    </ul>
-                {% else %}
-                    <p style="color: #3fb950;">No baseline vulnerabilities detected by local AST Scanner. Code syntax is safe.</p>
-                {% endif %}
+            {% if result.security_score < 100 and result.mode == 'audit' %}
+            <div class="cyber-cartoon-box">
+                <img src="{{ url_for('static', filename='alert.gif') }}" 
+                     alt="Cyber Alert" 
+                     style="width: 95px; height: auto; border-radius: 8px; border: 2px solid #ff4d4d; flex-shrink: 0;"
+                     onerror="this.style.display='none'; document.getElementById('fallbackRobot').style.display='block';">
+                
+                <div id="fallbackRobot" class="cartoon-avatar">
+                    🛡️🤖<span class="wagging-finger">☝️</span>
+                </div>
+
+                <div>
+                    <h3 style="color: #ff4d4d; margin: 0 0 5px 0; font-size: 1.3rem;">
+                        🚨 NO! UH-UH! CYBER THREAT & SECRET LEAK INTERCEPTED!
+                    </h3>
+                    <p style="color: #ffd6d6; margin: 0; font-size: 0.95rem;">
+                        <strong>Code-Clerk Guard says NO!</strong> Hardcoded keys or dangerous attack vectors were caught! Don't worry, I automatically scrubbed and redacted your secrets before they could leak to the cloud.
+                    </p>
+                </div>
+            </div>
             {% endif %}
 
-            <h4>🤖 Intelligent AI Security Review:</h4>
-            <div style="background: #010409; padding: 15px; border-radius: 6px; white-space: pre-wrap; font-family: monospace; font-size: 13px; color: #7ee787;">
-                {{ result.ai_feedback }}
-            </div>
+            <div class="result">
+                <h3>Result (Target: {{ result.language | upper }} | Mode: {{ result.mode | upper }})</h3>
+                <p style="font-size: 12px; color: #8b949e;">{{ result.message }}</p>
+                
+                {% if result.mode == 'audit' %}
+                    <p class="score">Security Score: {{ result.security_score }} / 100</p>
+                    <h4>Detected Vulnerabilities & Cloud Governance Risks:</h4>
+                    {% if result.issues_found %}
+                        <ul>
+                        {% for issue in result.issues_found %}
+                            <li>{{ issue }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p style="color: #3fb950;">✅ No baseline vulnerabilities detected by local AST & DevSecOps Scanner.</p>
+                    {% endif %}
+                {% endif %}
 
-            <div style="margin-top: 20px;">
-                <a href="/download/{{ result.review_id }}" style="background: #1f6feb; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-size: 14px; display: inline-block;">📥 Download Audit Report (.TXT)</a>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4>🤖 Hardened AI Security Review:</h4>
+                    <button type="button" onclick="copyFeedback()" style="width: auto; padding: 6px 12px; font-size: 12px; background: #21262d; border: 1px solid #30363d;">📋 Copy Output</button>
+                </div>
+                <div id="aiFeedbackBox" style="background: #010409; padding: 15px; border-radius: 6px; white-space: pre-wrap; font-family: monospace; font-size: 13px; color: #7ee787; overflow-x: auto;">{{ result.ai_feedback }}</div>
+
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <a href="/download/{{ result.review_id }}" style="background: #1f6feb; color: white; padding: 10px 15px; border-radius: 6px; text-decoration: none; font-size: 14px;">📥 Download Audit Report (.TXT)</a>
+                    <a href="/" style="background: #21262d; color: #58a6ff; padding: 10px 15px; border-radius: 6px; text-decoration: none; border: 1px solid #30363d; font-size: 14px;">🔄 Start New Scan</a>
+                </div>
             </div>
-            <div style="margin-top: 15px;">
-                <a href="/" style="background: #21262d; color: #58a6ff; padding: 10px 15px; border-radius: 6px; text-decoration: none; border: 1px solid #30363d; display: inline-block;">🔄 Start New Task (Clear)</a>
-            </div>
-        </div>
         {% endif %}
     </div>
+
+    <script>
+        const codeInput = document.getElementById('codeInput');
+        const charCount = document.getElementById('charCount');
+        if (codeInput) {
+            codeInput.addEventListener('input', () => {
+                charCount.textContent = `${codeInput.value.length} / 20000 characters`;
+            });
+        }
+
+        const auditForm = document.getElementById('auditForm');
+        const submitBtn = document.getElementById('submitBtn');
+        if (auditForm) {
+            auditForm.addEventListener('submit', () => {
+                submitBtn.disabled = true;
+                submitBtn.textContent = '🔒 Sanitizing Secrets & Running Audit... Please Wait';
+            });
+        }
+
+        function copyFeedback() {
+            const text = document.getElementById('aiFeedbackBox').innerText;
+            navigator.clipboard.writeText(text);
+            alert('AI Security Review copied to clipboard!');
+        }
+    </script>
 </body>
 </html>
